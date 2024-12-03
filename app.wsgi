@@ -1,9 +1,9 @@
-import sys
 import os
+import sys
 
-sys.path.insert(0, '/var/www/gis_api_generacional')
-activate_this = '/var/www/gis_api_generacional/venv/bin/activate_this.py'
-exec(open(activate_this).read(), {'__file__': activate_this})
+# Añadir el entorno virtual
+venv_path = '/var/www/gis_api_generacional/venv'
+sys.path.insert(0, os.path.join(venv_path, 'lib', 'python3.12', 'site-packages'))
 
-from app import app as application  # Ajusta 'app' al nombre de tu aplicación
-app.wsgi
+# Configurar la aplicación
+from your_application import app as application
