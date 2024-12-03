@@ -9,4 +9,4 @@ sys.path.insert(0, os.path.join(venv_path, 'lib', 'python3.12', 'site-packages')
 sys.path.append('/var/www/gis_api_generacional')
 
 # Configurar la aplicación 
-from your_application import app as application
+from api import app as application
