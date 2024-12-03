@@ -1,0 +1,7 @@
+pandas
+geopandas
+sqlalchemy
+numpy
+xgboost
+joblib
+scikit-learn
