@@ -48,7 +48,7 @@ def root():
 
 
 @app.get("/predict")
-def predecir_ventas(lon: float, lat: float, pob_tot: int, nse: str):
+def predecir_ventas(lon: float, lat: float, pob_tot: int, nse: str, distancia: int = _distancia):
     """
     Predice ventas potenciales de abarrotes en una manzana específica.
 
