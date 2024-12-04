@@ -99,8 +99,8 @@ def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
         # Realizar la predicción
         prediccion = model.predict(X_pred)
+        return {"prediction": float(prediccion[0])}
 
-        return {"prediction": prediccion[0]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
 
