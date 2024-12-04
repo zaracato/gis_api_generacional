@@ -46,56 +46,56 @@ _distancia = 500
 def root():
     return {"message": "Bienvenido a la API de predicción de ventas de abarrotes"}
 
-
 @app.get("/predict")
-def predecir_ventas(lon: float, lat: float, pob_tot: int, nse: str, distancia: int = _distancia):
+def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
     """
-    Predice ventas potenciales de abarrotes en una manzana específica.
+    Predice ventas potenciales de abarrotes en una manzana específica basada en la ubicación.
 
     Parámetros:
-        lon (float): Longitud de la manzana.
-        lat (float): Latitud de la manzana.
-        pob_tot (int): Población total de la manzana.
-        nse (str): Nivel socioeconómico.
+        lon (float): Longitud de la ubicación.
+        lat (float): Latitud de la ubicación.
 
     Retorno:
         JSON: Predicción del modelo.
     """
     try:
-        # Crear un GeoDataFrame para la manzana
-        manzana = gpd.GeoDataFrame({
-            'longitud': [lon],
-            'latitud': [lat],
-            'pob_tot': [pob_tot],
-            'nse': [nse]
-        }, geometry=[Point(lon, lat)], crs="EPSG:4326")
+        # Crear un punto con las coordenadas proporcionadas
+        punto = gpd.GeoDataFrame(
+            {'geometry': [Point(lon, lat)]}, crs="EPSG:4326"
+        )
 
-        # Transformar CRS a métrico
+        # Transformar CRS a métrico para realizar cálculos espaciales
         metric_crs = 'EPSG:6372'
-        manzana = manzana.to_crs(metric_crs)
-        comercios_gdf_metric = comercios_gdf.to_crs(metric_crs)
+        punto_metric = punto.to_crs(metric_crs)
         manzanas_gdf_metric = manzanas_gdf.to_crs(metric_crs)
 
+        # Buscar la manzana más cercana
+        manzanas_gdf_metric['distance'] = manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry)
+        manzana_cercana = manzanas_gdf_metric.loc[manzanas_gdf_metric['distance'].idxmin()]
+
+        # Extraer datos de la manzana encontrada
+        pob_tot = manzana_cercana['pob_tot']
+        nse = manzana_cercana['nse']
+
         # Calcular abarrotes cercanos
-        manzana['abarrotes_cercanas'] = manzana.apply(
-            lambda row: (comercios_gdf_metric.geometry.distance(row.geometry) <= _distancia).sum(),
-            axis=1
-        )
+        comercios_gdf_metric = comercios_gdf.to_crs(metric_crs)
+        abarrotes_cercanas = (comercios_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia).sum()
 
         # Calcular población cercana
-        manzana['poblacion_cercana'] = manzana.apply(
-            lambda row: manzanas_gdf_metric.loc[
-                manzanas_gdf_metric.geometry.distance(row.geometry) <= _distancia, 'pob_tot'
-            ].sum(),
-            axis=1
-        )
+        poblacion_cercana = manzanas_gdf_metric.loc[
+            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia, 'pob_tot'
+        ].sum()
 
         # Codificar NSE
-        manzana['NSE_encoded'] = manzana['nse'].map(nse_mapping)
+        nse_encoded = nse_mapping.get(nse, 0)  # Mapeo con valor por defecto 0 si el NSE no existe
 
         # Preparar datos para predicción
-        features = ['abarrotes_cercanas', 'pob_tot', 'poblacion_cercana', 'NSE_encoded']
-        X_pred = manzana[features].fillna(0)
+        X_pred = pd.DataFrame([{
+            'abarrotes_cercanas': abarrotes_cercanas,
+            'pob_tot': pob_tot,
+            'poblacion_cercana': poblacion_cercana,
+            'NSE_encoded': nse_encoded
+        }]).fillna(0)
 
         # Realizar la predicción
         prediccion = model.predict(X_pred)
@@ -103,3 +103,62 @@ def predecir_ventas(lon: float, lat: float, pob_tot: int, nse: str, distancia: i
         return {"prediction": prediccion[0]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
+
+@app.get("/predict2")
+def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
+    """
+    Predice ventas potenciales de abarrotes en una manzana específica basada en la ubicación.
+
+    Parámetros:
+        lon (float): Longitud de la ubicación.
+        lat (float): Latitud de la ubicación.
+
+    Retorno:
+        JSON: Predicción del modelo.
+    """
+    try:
+        # Crear un punto con las coordenadas proporcionadas
+        punto = gpd.GeoDataFrame(
+            {'geometry': [Point(lon, lat)]}, crs="EPSG:4326"
+        )
+
+        # Transformar CRS a métrico para realizar cálculos espaciales
+        metric_crs = 'EPSG:6372'
+        punto_metric = punto.to_crs(metric_crs)
+        manzanas_gdf_metric = manzanas_gdf.to_crs(metric_crs)
+
+        # Buscar la manzana más cercana
+        manzanas_gdf_metric['distance'] = manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry)
+        manzana_cercana = manzanas_gdf_metric.loc[manzanas_gdf_metric['distance'].idxmin()]
+
+        # Extraer datos de la manzana encontrada
+        pob_tot = manzana_cercana['pob_tot']
+        nse = manzana_cercana['nse']
+
+        # Calcular abarrotes cercanos
+        comercios_gdf_metric = comercios_gdf.to_crs(metric_crs)
+        abarrotes_cercanas = (comercios_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia).sum()
+
+        # Calcular población cercana
+        poblacion_cercana = manzanas_gdf_metric.loc[
+            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia, 'pob_tot'
+        ].sum()
+
+        # Codificar NSE
+        nse_encoded = nse_mapping.get(nse, 0)  # Mapeo con valor por defecto 0 si el NSE no existe
+
+        # Preparar datos para predicción
+        X_pred = pd.DataFrame([{
+            'abarrotes_cercanas': abarrotes_cercanas,
+            'pob_tot': pob_tot,
+            'poblacion_cercana': poblacion_cercana,
+            'NSE_encoded': nse_encoded
+        }]).fillna(0)
+
+        # Realizar la predicción
+        prediccion = model.predict(X_pred)
+
+        return {"prediction": prediccion[0]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
+
