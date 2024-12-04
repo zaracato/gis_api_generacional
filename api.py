@@ -18,8 +18,8 @@ connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{
 engine = create_engine(connection_string)
 
 # Cargar el modelo entrenado y el mapeo
-model = joblib.load('modelo_combustible_abarrotes.pkl')
-nse_mapping = joblib.load('nse_mapping_abarrotes.pkl')
+model = joblib.load('/var/www/gis_api_generacional/modelo_combustible_abarrotes.pkl')
+nse_mapping = joblib.load('/var/www/gis_api_generacional/nse_mapping_abarrotes.pkl')
 
 # Cargar los datos necesarios
 with engine.connect() as conn:
