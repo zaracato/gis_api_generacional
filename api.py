@@ -73,17 +73,17 @@ async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
         manzana_cercana = manzanas_gdf_metric.loc[manzanas_gdf_metric['distance'].idxmin()]
 
         # Extraer datos de la manzana encontrada
-        pob_tot = manzana_cercana['pob_tot']
+        pob_tot = int(manzana_cercana['pob_tot'])  # Conversión explícita a int
         nse = manzana_cercana['nse']
 
         # Calcular abarrotes cercanos
         comercios_gdf_metric = comercios_gdf.to_crs(metric_crs)
-        abarrotes_cercanas = (comercios_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia).sum()
+        abarrotes_cercanas = int((comercios_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia).sum())
 
         # Calcular población cercana
-        poblacion_cercana = manzanas_gdf_metric.loc[
+        poblacion_cercana = int(manzanas_gdf_metric.loc[
             manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia, 'pob_tot'
-        ].sum()
+        ].sum())
 
         # Codificar NSE
         nse_encoded = nse_mapping.get(nse, 0)  # Mapeo con valor por defecto 0 si el NSE no existe
@@ -98,7 +98,12 @@ async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
         # Realizar la predicción
         prediccion = model.predict(X_pred)
-        return {"prediction": float(prediccion[0]), "poblacion": int(pob_tot), "poblacion_cercana":poblacion_cercana,  "NSE": nse}
+        return {
+            "prediction": float(prediccion[0]),  # Asegurando que sea float
+            "poblacion": pob_tot,
+            "poblacion_cercana": poblacion_cercana,
+            "NSE": nse
+        }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
