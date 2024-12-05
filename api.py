@@ -46,8 +46,8 @@ _distancia = 500
 def root():
     return {"message": "Bienvenido a la API de predicción de ventas de abarrotes"}
 
-@app.get("/predict")
-def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
+@app.get("/api/predict")
+async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
     """
     Predice ventas potenciales de abarrotes en una manzana específica basada en la ubicación.
 
@@ -103,62 +103,3 @@ def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
-
-@app.get("/predict2")
-def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
-    """
-    Predice ventas potenciales de abarrotes en una manzana específica basada en la ubicación.
-
-    Parámetros:
-        lon (float): Longitud de la ubicación.
-        lat (float): Latitud de la ubicación.
-
-    Retorno:
-        JSON: Predicción del modelo.
-    """
-    try:
-        # Crear un punto con las coordenadas proporcionadas
-        punto = gpd.GeoDataFrame(
-            {'geometry': [Point(lon, lat)]}, crs="EPSG:4326"
-        )
-
-        # Transformar CRS a métrico para realizar cálculos espaciales
-        metric_crs = 'EPSG:6372'
-        punto_metric = punto.to_crs(metric_crs)
-        manzanas_gdf_metric = manzanas_gdf.to_crs(metric_crs)
-
-        # Buscar la manzana más cercana
-        manzanas_gdf_metric['distance'] = manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry)
-        manzana_cercana = manzanas_gdf_metric.loc[manzanas_gdf_metric['distance'].idxmin()]
-
-        # Extraer datos de la manzana encontrada
-        pob_tot = manzana_cercana['pob_tot']
-        nse = manzana_cercana['nse']
-
-        # Calcular abarrotes cercanos
-        comercios_gdf_metric = comercios_gdf.to_crs(metric_crs)
-        abarrotes_cercanas = (comercios_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia).sum()
-
-        # Calcular población cercana
-        poblacion_cercana = manzanas_gdf_metric.loc[
-            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia, 'pob_tot'
-        ].sum()
-
-        # Codificar NSE
-        nse_encoded = nse_mapping.get(nse, 0)  # Mapeo con valor por defecto 0 si el NSE no existe
-
-        # Preparar datos para predicción
-        X_pred = pd.DataFrame([{
-            'abarrotes_cercanas': abarrotes_cercanas,
-            'pob_tot': pob_tot,
-            'poblacion_cercana': poblacion_cercana,
-            'NSE_encoded': nse_encoded
-        }]).fillna(0)
-
-        # Realizar la predicción
-        prediccion = model.predict(X_pred)
-
-        return {"prediction": prediccion[0]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
-
