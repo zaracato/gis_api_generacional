@@ -7,7 +7,6 @@ import joblib
 from shapely.geometry import Point
 
 app = FastAPI()
-router = APIRouter(prefix="/api")
 # Configurar conexión a PostgreSQL
 db_host = 'localhost'
 db_port = '5432'
