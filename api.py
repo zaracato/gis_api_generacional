@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
 import pandas as pd
 import geopandas as gpd
@@ -7,7 +7,7 @@ import joblib
 from shapely.geometry import Point
 
 app = FastAPI()
-
+router = APIRouter(prefix="/api")
 # Configurar conexión a PostgreSQL
 db_host = 'localhost'
 db_port = '5432'
@@ -103,3 +103,6 @@ async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
+
+# Incluir el enrutador en la aplicación principal
+app.include_router(router)
