@@ -42,11 +42,11 @@ with engine.connect() as conn:
 _distancia = 500
 
 
-@app.get("/api/")
+@app.get("/")
 def root():
     return {"message": "Bienvenido a la API de predicción de ventas de abarrotes"}
 
-@app.get("/api/predict")
+@app.get("/predict")
 def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
     """
     Predice ventas potenciales de abarrotes en una manzana específica basada en la ubicación.
