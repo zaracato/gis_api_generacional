@@ -102,6 +102,3 @@ async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
-
-# Incluir el enrutador en la aplicación principal
-app.include_router(router)
