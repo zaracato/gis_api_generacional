@@ -124,7 +124,7 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
     """
     try:
         # Crear punto base
-        punto = gpd.GeoDataFrame({'geometry': [Point(lon, lat)]}, crs="EPSG:4326")
+        punto = gpd.GeoDataFrame({'geometry': [Point(lon, lat)]}, crs="EPSG:6372")
 
         # Transformar a CRS métrico
         metric_crs = 'EPSG:6372'
