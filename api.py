@@ -123,9 +123,10 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         JSON: Lista de manzanas con su NSE y población.
     """
     try:
-        # Crear punto base
-        punto = gpd.GeoDataFrame({'geometry': [Point(lon, lat)]}, crs="EPSG:6372")
-
+        # Crear un punto con las coordenadas proporcionadas
+        punto = gpd.GeoDataFrame(
+            {'geometry': [Point(lon, lat)]}, crs="EPSG:4326"
+        )
         # Transformar a CRS métrico
         metric_crs = 'EPSG:6372'
         punto_metric = punto.to_crs(metric_crs)
@@ -134,7 +135,7 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         # Filtrar manzanas dentro del doble de la distancia indicada
         distancia_doble = 2 * distancia
         manzanas_cercanas = manzanas_gdf_metric[
-            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia_doble
+            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia
         ]
         print("Total manzanas cargadas:", len(manzanas_gdf))
 
