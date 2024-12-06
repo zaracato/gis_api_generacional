@@ -107,3 +107,59 @@ async def predecir_ventas(lon: float, lat: float, distancia: int = _distancia):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
+    
+@app.get("/nse_around")
+async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia):
+    """
+    Retorna las manzanas alrededor de un punto (lon, lat) dentro del doble de la distancia especificada,
+    incluyendo el NSE y la población total por cada manzana.
+
+    Parámetros:
+        lon (float): Longitud de la ubicación.
+        lat (float): Latitud de la ubicación.
+        distancia (int): Distancia base en metros. Se utilizará el doble de este valor.
+
+    Retorno:
+        JSON: Lista de manzanas con su NSE y población.
+    """
+    try:
+        # Crear punto base
+        punto = gpd.GeoDataFrame({'geometry': [Point(lon, lat)]}, crs="EPSG:4326")
+
+        # Transformar a CRS métrico
+        metric_crs = 'EPSG:6372'
+        punto_metric = punto.to_crs(metric_crs)
+        manzanas_gdf_metric = manzanas_gdf.to_crs(metric_crs)
+
+        # Filtrar manzanas dentro del doble de la distancia indicada
+        distancia_doble = 2 * distancia
+        manzanas_cercanas = manzanas_gdf_metric[
+            manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia_doble
+        ]
+
+        # Agrupar por NSE y sumar poblaciones
+        agrupado = manzanas_cercanas.groupby('nse')['pob_tot'].sum().reset_index(name='pob_total_nse')
+        poblacion_total = agrupado['pob_total_nse'].sum()
+
+
+        # Crear diccionario para acceder al porcentaje por NSE
+        porcentaje_por_nse = {
+            row['nse']: (row['pob_total_nse'] / poblacion_total * 100 if poblacion_total > 0 else 0)
+            for _, row in agrupado.iterrows()
+        }
+
+        # Construir resultado con la información por manzana
+        resultado = []
+        for _, row in manzanas_cercanas.iterrows():
+            resultado.append({
+                "nse": row['nse'],
+                "poblacion_total": int(row['pob_tot']),
+                "porcentaje": porcentaje_por_nse.get(row['nse'], 0),
+                "longitud": float(row['longitud']),
+                "latitud": float(row['latitud'])
+            })
+
+        return resultado
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener NSE: {str(e)}")
