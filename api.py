@@ -136,6 +136,9 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         manzanas_cercanas = manzanas_gdf_metric[
             manzanas_gdf_metric.geometry.distance(punto_metric.iloc[0].geometry) <= distancia_doble
         ]
+        print("Total manzanas cargadas:", len(manzanas_gdf))
+
+        print("Total manzanas cercanas:", len(manzanas_cercanas))
 
         # Agrupar por NSE y sumar poblaciones
         agrupado = manzanas_cercanas.groupby('nse')['pob_tot'].sum().reset_index(name='pob_total_nse')
