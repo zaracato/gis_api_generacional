@@ -31,7 +31,7 @@ with engine.connect() as conn:
     )
 
     # Cargar manzanas
-    query_manzanas = "SELECT longitud, latitud, pob_tot, nse, ,pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada FROM catalogo_manzanas WHERE beb_noalcoh > 0"
+    query_manzanas = "SELECT longitud, latitud, pob_tot, nse, pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada FROM catalogo_manzanas WHERE beb_noalcoh > 0"
     manzanas = pd.read_sql(query_manzanas, conn)
     manzanas_gdf = gpd.GeoDataFrame(
         manzanas, geometry=gpd.points_from_xy(manzanas['longitud'], manzanas['latitud']), crs="EPSG:4326"
