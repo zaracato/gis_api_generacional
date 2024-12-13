@@ -163,10 +163,10 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         agrupado.rename(columns=nombres_totales, inplace=True)
 
         # Calcular la población total para cada campo
-        totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
+        #totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
 
         # Mostrar los totales
-        print(totales)
+        #print(totales)
 
         # Crear diccionario para acceder al porcentaje por NSE
         porcentaje_por_nse = {
@@ -179,13 +179,20 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         # Construir resultado con la información por manzana
         resultado = []
         for _, row in manzanas_cercanas.iterrows():
-            resultado.append({
+            # Crear el diccionario con los campos comunes
+            entrada = {
                 "nse": row['nse'],
                 "poblacion_total": int(row['pob_tot']),
                 "porcentaje": porcentaje_por_nse.get(row['nse'], 0),
                 "longitud": float(row['longitud']),
                 "latitud": float(row['latitud'])
-            })
+            }
+            
+            # Agregar totales por cada campo al resultado
+            for campo in campos_a_sumar:
+                entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
+            
+            resultado.append(entrada)
 
         return resultado
 
