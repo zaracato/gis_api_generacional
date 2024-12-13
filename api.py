@@ -31,7 +31,7 @@ with engine.connect() as conn:
     )
 
     # Cargar manzanas
-    query_manzanas = "SELECT longitud, latitud, pob_tot, nse FROM catalogo_manzanas WHERE beb_noalcoh > 0"
+    query_manzanas = "SELECT longitud, latitud, pob_tot, nse, ,pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada FROM catalogo_manzanas WHERE beb_noalcoh > 0"
     manzanas = pd.read_sql(query_manzanas, conn)
     manzanas_gdf = gpd.GeoDataFrame(
         manzanas, geometry=gpd.points_from_xy(manzanas['longitud'], manzanas['latitud']), crs="EPSG:4326"
@@ -144,13 +144,37 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         # Agrupar por NSE y sumar poblaciones
         agrupado = manzanas_cercanas.groupby('nse')['pob_tot'].sum().reset_index(name='pob_total_nse')
         poblacion_total = agrupado['pob_total_nse'].sum()
+        # crea totales para los siguientes campos pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada
+        # Lista de campos a sumar
+        campos_a_sumar = [
+            'pob_tot', 'pob_fem', 'pob_mas', 'bebes', 'bebes_fem', 'bebes_mas',
+            'niños', 'niños_fem', 'niños_mas', 'jovenes', 'jovenes_fem', 'jovenes_mas',
+            'adultos', 'adultos_fem', 'adultos_mas', 'mayores', 'mayores_fem',
+            'mayores_mas', 'pea', 'pob_ocupada'
+        ]
 
+        # Crear un diccionario para renombrar los campos después de la agrupación
+        nombres_totales = {campo: f"{campo}_total_nse" for campo in campos_a_sumar}
+
+        # Agrupar por NSE y sumar las poblaciones para cada campo
+        agrupado = manzanas_cercanas.groupby('nse')[campos_a_sumar].sum().reset_index()
+
+        # Renombrar las columnas con los nombres de totales
+        agrupado.rename(columns=nombres_totales, inplace=True)
+
+        # Calcular la población total para cada campo
+        totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
+
+        # Mostrar los totales
+        print(totales)
 
         # Crear diccionario para acceder al porcentaje por NSE
         porcentaje_por_nse = {
             row['nse']: (row['pob_total_nse'] / poblacion_total * 100 if poblacion_total > 0 else 0)
             for _, row in agrupado.iterrows()
         }
+
+
 
         # Construir resultado con la información por manzana
         resultado = []
