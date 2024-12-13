@@ -163,10 +163,10 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         agrupado.rename(columns=nombres_totales, inplace=True)
 
         # Calcular la población total para cada campo
-        #totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
+        totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
 
         # Mostrar los totales
-        #print(totales)
+        print(totales)
 
         # Crear diccionario para acceder al porcentaje por NSE
         porcentaje_por_nse = {
