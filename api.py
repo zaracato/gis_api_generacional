@@ -166,7 +166,7 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         totales = {campo: agrupado[f"{campo}_total_nse"].sum() for campo in campos_a_sumar}
 
         # Mostrar los totales
-        print(totales)
+        #print(totales)
 
         # Crear diccionario para acceder al porcentaje por NSE
         porcentaje_por_nse = {
@@ -189,9 +189,11 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
             }
             
             # Agregar totales por cada campo al resultado
-            for campo in campos_a_sumar:
-                entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
-            
+            #for campo in campos_a_sumar:
+            #    entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
+            for total in totales:
+                entrada[f"{total}_total_nse"] = totales[total]
+
             resultado.append(entrada)
 
         return resultado
