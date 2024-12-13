@@ -147,7 +147,7 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
         # crea totales para los siguientes campos pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada
         # Lista de campos a sumar
         campos_a_sumar = [
-            'pob_tot', 'pob_fem', 'pob_mas', 'bebes', 'bebes_fem', 'bebes_mas',
+             'pob_fem', 'pob_mas', 'bebes', 'bebes_fem', 'bebes_mas',
             'niños', 'niños_fem', 'niños_mas', 'jovenes', 'jovenes_fem', 'jovenes_mas',
             'adultos', 'adultos_fem', 'adultos_mas', 'mayores', 'mayores_fem',
             'mayores_mas', 'pea', 'pob_ocupada'
