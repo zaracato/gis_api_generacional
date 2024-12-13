@@ -185,14 +185,15 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
                 "poblacion_total": int(row['pob_tot']),
                 "porcentaje": porcentaje_por_nse.get(row['nse'], 0),
                 "longitud": float(row['longitud']),
-                "latitud": float(row['latitud'])
+                "latitud": float(row['latitud']),
+                "total" : total
             }
             
             # Agregar totales por cada campo al resultado
             #for campo in campos_a_sumar:
             #    entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
-            for total in totales:
-                entrada[f"{total}_total_nse"] = totales[total]
+            #for total in totales:
+            #    entrada[f"{total}_total_nse"] = totales[total]
 
             resultado.append(entrada)
 
