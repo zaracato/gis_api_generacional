@@ -150,7 +150,7 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
             row['nse']: (row['pob_total_nse'] / poblacion_total * 100 if poblacion_total > 0 else 0)
             for _, row in agrupado.iterrows()
         }
-        
+
         # crea totales para los siguientes campos pob_fem,pob_mas,bebes,bebes_fem,bebes_mas,niños,niños_fem,niños_mas,jovenes,jovenes_fem,jovenes_mas,adultos,adultos_fem,adultos_mas,mayores,mayores_fem,mayores_mas,pea,pob_ocupada
         # Lista de campos a sumar
         campos_a_sumar = [
@@ -189,14 +189,14 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
                 "porcentaje": porcentaje_por_nse.get(row['nse'], 0),
                 "longitud": float(row['longitud']),
                 "latitud": float(row['latitud']),
-                "total" : totales
+                
             }
             
             # Agregar totales por cada campo al resultado
-            #for campo in campos_a_sumar:
-            #    entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
-            #for total in totales:
-            #    entrada[f"{total}_total_nse"] = totales[total]
+            for campo in campos_a_sumar:
+                entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
+            for total in totales:
+                entrada[f"{total}_total_"] = totales[total]
 
             resultado.append(entrada)
 
