@@ -17,8 +17,8 @@ connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{
 engine = create_engine(connection_string)
 
 # Cargar el modelo entrenado y el mapeo
-model = joblib.load('/var/www/gis_api_generacional/modelo_combustible_abarrotes.pkl')
-nse_mapping = joblib.load('/var/www/gis_api_generacional/nse_mapping_abarrotes.pkl')
+model = joblib.load('./modelo_combustible_abarrotes.pkl')
+nse_mapping = joblib.load('./nse_mapping_abarrotes.pkl')
 
 # Cargar los datos necesarios
 with engine.connect() as conn:
@@ -195,8 +195,8 @@ async def obtener_nse_around(lon: float, lat: float, distancia: int = _distancia
             # Agregar totales por cada campo al resultado
             for campo in campos_a_sumar:
                 entrada[f"{campo}_total_nse"] = int(agrupado.loc[agrupado['nse'] == row['nse'], f"{campo}_total_nse"].values[0])
-            for total in totales:
-                entrada[f"{total}_total_"] = totales[total]
+            #for total in totales:
+            #    entrada[f"{total}_total_"] = totales[total]
 
             resultado.append(entrada)
 
