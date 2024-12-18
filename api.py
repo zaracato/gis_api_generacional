@@ -6,7 +6,25 @@ from sqlalchemy import create_engine, text
 import joblib
 from shapely.geometry import Point
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+origins = [
+    "*",  # Puedes colocar aquí los dominios específicos permitidos en vez de "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Aquí sigue el resto de tu código existente, incluyendo tus rutas.
+# ...
+
 # Configurar conexión a PostgreSQL
 db_host = 'localhost'
 db_port = '5432'
